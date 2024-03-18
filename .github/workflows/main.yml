@@ -16,10 +16,13 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '20'
         
     - name: Install dependencies
       run: npm install
+
+    - name: Ensure dist directory exists
+      run: mkdir -p ./dist
 
     - name: Deploy to Amazon S3
       uses: jakejarvis/s3-sync-action@master
@@ -36,4 +39,5 @@ jobs:
       uses: treosh/lighthouse-ci-action@v8
       with:
         urls: |
-          http://lask
+          http://laskaridissa.com
+        uploadArtifacts: true
