@@ -21,10 +21,12 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    # The step for compiling SCSS, minifying assets, or optimizing images has been removed based on previous discussions.
+
     - name: Deploy to Amazon S3
       uses: jakejarvis/s3-sync-action@master
       with:
-        args: --acl public-read --delete --cache-control "max-age=31536000, must-revalidate"
+        args: --acl public-read --delete --cache-control 'max-age=31536000, must-revalidate'
       env:
         AWS_S3_BUCKET: laskaridissa.com
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
