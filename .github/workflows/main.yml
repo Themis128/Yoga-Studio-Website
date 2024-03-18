@@ -1,0 +1,48 @@
+name: Deploy and Test Static Site
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Lint JavaScript
+      run: npx eslint .
+
+    - name: Lint CSS
+      run: npx stylelint "**/*.css"
+
+    # Deployment to S3
+    - name: Deploy to Amazon S3
+      uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --delete
+      env:
+        AWS_S3_BUCKET: laskaridissa.com
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'eu-central-1'  # Adjust as necessary
+        SOURCE_DIR: './'  # Adjust based on your build directory
+
+    # Add any additional tests post-deployment here, such as:
+    # - name: Performance Testing with Lighthouse
+    #   uses: treosh/lighthouse-ci-action@v8
+    #   with:
+    #     urls: |
+    #       https://example.com
+    #     uploadArtifacts: true
