@@ -1,38 +1,48 @@
-name: Deploy Website to Amazon S3
+name: Deploy and Test Static Site
 
 on:
   push:
     branches:
-      - main  # Trigger on pushes to the main branch
+      - main
 
 jobs:
-  deploy:
+  build-test-deploy:
     runs-on: ubuntu-latest
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
       
-    - name: Set up AWS CLI
-      uses: aws-actions/configure-aws-credentials@v1
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-central-1  # Adjust your AWS region as necessary
+        node-version: '14'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Lint JavaScript
+      run: npx eslint .
 
-    - name: Delete contents of the S3 bucket
-      run: aws s3 rm s3://laskaridissa.com --recursive
+    - name: Lint CSS
+      run: npx stylelint "**/*.css"
 
-    - name: Adjust directory structure (if necessary)
-      run: |
-        # Your commands to adjust the directory structure go here
-        # This step is optional and depends on your project's specific needs
+    # Deployment to S3
+    - name: Deploy to Amazon S3
+      uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --delete
+      env:
+        AWS_S3_BUCKET: laskaridissa.com
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'eu-central-1'  # Adjust as necessary
+        SOURCE_DIR: './'  # Adjust based on your build directory
 
-    - name: Deploy to S3
-      run: aws s3 sync . s3://laskaridissa.com --delete
-      # The sync command now starts from the current directory ('.')
-      # Adjust the source directory if your site's files are in a subdirectory.
-
-    - name: Verify deployment
-      run: |
-        # Optional: Commands to verify your deployment could be added here.
-        # This could include checking for the presence of certain files in the bucket or ensuring the site is responding as expected.
+    # Add any additional tests post-deployment here, such as:
+    # - name: Performance Testing with Lighthouse
+    #   uses: treosh/lighthouse-ci-action@v8
+    #   with:
+    #     urls: |
+    #       https://example.com
+    #     uploadArtifacts: true
