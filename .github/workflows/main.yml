@@ -1,0 +1,51 @@
+name: Deploy Website to Amazon S3
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-central-1  # e.g., us-east-1
+
+    - name: Check if S3 bucket exists
+      run: |
+        if ! aws s3 ls "s3://YOUR_BUCKET_NAME" > /dev/null; then
+          echo "Bucket does not exist"
+          exit 1
+        fi
+
+    - name: Delete contents of the S3 bucket
+      run: aws s3 rm s3://laskarissa.com --recursive
+
+    - name: Build project (if necessary)
+      run: YOUR_BUILD_COMMAND  # e.g., npm run build
+
+    - name: Adjust directory structure (if necessary)
+      run: |
+        # Your commands to adjust the directory structure go here
+        # This is highly specific to your project's structure
+        # For example, you might move files into a specific folder or change directory names
+
+    - name: Deploy to S3
+      run: aws s3 sync YOUR_BUILD_DIRECTORY s3://YOUR_BUCKET_NAME --delete
+        # Replace YOUR_BUILD_DIRECTORY with the directory containing your site's build artifacts
+        # The --delete flag ensures that files no longer present in the build directory are removed from the bucket
+
+    - name: Verify deployment
+      run: |
+        # Optional: Add commands to verify your deployment here
+        # This could be checking the status of specific files in the bucket
+        # Or ensuring the site responds as expected through curl or similar tools
+
