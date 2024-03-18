@@ -4,12 +4,14 @@
   "description": "<<<<<<< HEAD\r # Yoga-Studio-Website\r A website for a Yoga Studio\r =======\r Dimension Yoga Studio - website\r ##### Yoga Studio Website Design",
   "main": "index.js",
   "scripts": {
+    "compile-scss": "sass src/scss:dist/css",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "sass": "^1.32.8",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
