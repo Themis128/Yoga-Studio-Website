@@ -20,9 +20,6 @@ jobs:
         
     - name: Install dependencies
       run: npm install
-        
-    - name: Optimize Images
-      run: npx imagemin src/images/* --out-dir=dist/images
 
     - name: Deploy to Amazon S3
       uses: jakejarvis/s3-sync-action@master
@@ -40,4 +37,4 @@ jobs:
       with:
         urls: |
           http://laskaridissa.com
-        uploadArtifacts: true
+        uploadArtifacts
