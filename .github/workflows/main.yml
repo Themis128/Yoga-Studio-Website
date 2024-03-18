@@ -20,12 +20,6 @@ jobs:
         
     - name: Install dependencies
       run: npm install
-
-    - name: Minify CSS, JS, and HTML
-      run: |
-        npx terser src/js/*.js --compress --mangle --output dist/js/
-        npx cssnano src/css/*.css dist/css/
-        npx html-minifier --collapse-whitespace --remove-comments --minify-js true --minify-css true src/*.html -o dist/
         
     - name: Optimize Images
       run: npx imagemin src/images/* --out-dir=dist/images
