@@ -22,17 +22,15 @@ jobs:
     - name: Delete contents of the S3 bucket
       run: aws s3 rm s3://laskaridissa.com --recursive
 
-    - name: Build project (if necessary)
-      run: npm install && npm run build # Adjust this command based on your project's build process
-
     - name: Adjust directory structure (if necessary)
       run: |
         # Your commands to adjust the directory structure go here
         # This step is optional and depends on your project's specific needs
 
     - name: Deploy to S3
-      run: aws s3 sync build/ s3://laskaridissa.com --delete
-      # Ensure the build directory path is correct. The --delete flag will remove files in the bucket that are no longer present locally.
+      run: aws s3 sync . s3://laskaridissa.com --delete
+      # The sync command now starts from the current directory ('.')
+      # Adjust the source directory if your site's files are in a subdirectory.
 
     - name: Verify deployment
       run: |
