@@ -1,4 +1,4 @@
-name: CI/CD Workflow with Comprehensive Testing
+name: Full CI/CD Workflow for Static Site
 
 on:
   push:
@@ -6,38 +6,44 @@ on:
       - main
 
 jobs:
-  build-test-deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v2
       
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '20'
         
     - name: Install dependencies
       run: npm install
 
-    # CSS linting
-    - name: Lint CSS
-      run: npx stylelint "**/*.css"
+    - name: Compile SCSS to CSS
+      run: npm run compile-scss
+      
+    - name: Minify CSS, JS, and HTML
+      run: |
+        npx terser src/js/*.js --compress --mangle --output dist/js/
+        npx cssnano src/css/*.css dist/css/
+        npx html-minifier --collapse-whitespace --remove-comments --minify-js true --minify-css true src/*.html -o dist/
+        
+    - name: Optimize Images
+      run: npx imagemin src/images/* --out-dir=dist/images
 
-    # Deployment to S3
     - name: Deploy to Amazon S3
       uses: jakejarvis/s3-sync-action@master
       with:
-        args: --acl public-read --delete
+        args: --acl public-read --delete --cache-control "max-age=31536000, must-revalidate"
       env:
         AWS_S3_BUCKET: laskaridissa.com
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'eu-central-1'  # Adjust as necessary
-        SOURCE_DIR: './'  # Adjust based on your build directory
+        AWS_REGION: 'eu-central-1'
+        SOURCE_DIR: './dist'
 
-    # Performance Testing with Lighthouse
     - name: Performance Testing with Lighthouse
       uses: treosh/lighthouse-ci-action@v8
       with:
